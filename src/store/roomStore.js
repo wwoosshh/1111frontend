@@ -1,18 +1,21 @@
 import { create } from 'zustand';
 
-export const useRoomStore = create((set, get) => ({
+export const useRoomStore = create((set) => ({
   room: null,
   profiles: [],
   selections: [],
   activeProfileIds: [],
+  myProfileId: null,
 
-  setSnapshot: ({ room, profiles, selections }) =>
-    set({ room, profiles, selections }),
+  setSnapshot: ({ room, profiles, selections, myProfileId }) =>
+    set({ room, profiles, selections, myProfileId }),
 
   setRoom: (room) => set({ room }),
 
   addProfile: (profile) =>
-    set((s) => ({ profiles: [...s.profiles, profile] })),
+    set((s) => ({
+      profiles: s.profiles.some((p) => p.id === profile.id) ? s.profiles : [...s.profiles, profile],
+    })),
 
   removeProfile: (profileId) =>
     set((s) => ({
@@ -23,16 +26,10 @@ export const useRoomStore = create((set, get) => ({
   applyDateChange: ({ profileId, date, action }) =>
     set((s) => {
       if (action === 'add') {
-        const exists = s.selections.some(
-          (x) => x.profileId === profileId && x.date === date
-        );
+        const exists = s.selections.some((x) => x.profileId === profileId && x.date === date);
         return exists ? s : { selections: [...s.selections, { profileId, date }] };
       }
-      return {
-        selections: s.selections.filter(
-          (x) => !(x.profileId === profileId && x.date === date)
-        ),
-      };
+      return { selections: s.selections.filter((x) => !(x.profileId === profileId && x.date === date)) };
     }),
 
   setConfirmedDate: (confirmedDate) =>
@@ -40,5 +37,5 @@ export const useRoomStore = create((set, get) => ({
 
   setActiveProfileIds: (ids) => set({ activeProfileIds: ids }),
 
-  reset: () => set({ room: null, profiles: [], selections: [], activeProfileIds: [] }),
+  reset: () => set({ room: null, profiles: [], selections: [], activeProfileIds: [], myProfileId: null }),
 }));

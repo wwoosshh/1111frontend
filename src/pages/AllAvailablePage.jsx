@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+// frontend/src/pages/AllAvailablePage.jsx
+import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { clearSession, loadSession } from '../lib/session.js';
 import { useRoom } from '../hooks/useRoom.js';
 import { useSocket } from '../hooks/useSocket.js';
 import { useRoomStore } from '../store/roomStore.js';
@@ -11,7 +11,6 @@ import Calendar from '../components/Calendar.jsx';
 const formatDate = (raw) => {
   if (!raw) return '';
   if (typeof raw === 'string') return raw.slice(0, 10);
-  // pg DATE may come as JS Date; format as YYYY-MM-DD in local time
   const d = new Date(raw);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
@@ -19,7 +18,7 @@ const formatDate = (raw) => {
 export default function AllAvailablePage() {
   const { roomId } = useParams();
   const nav = useNavigate();
-  const { error: roomError } = useRoom(roomId);
+  useRoom(roomId);
   useSocket(roomId);
 
   const room = useRoomStore((s) => s.room);
@@ -29,19 +28,6 @@ export default function AllAvailablePage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    const s = loadSession(roomId);
-    if (!s?.accessToken) nav(`/room/${roomId}`);
-  }, [roomId, nav]);
-
-  useEffect(() => {
-    if (roomError) {
-      clearSession(roomId);
-      nav(`/room/${roomId}`);
-    }
-  }, [roomError, roomId, nav]);
-
-  // Map: date -> Set<profileId>
   const dateToProfiles = useMemo(() => {
     const map = new Map();
     for (const s of selections) {
@@ -61,7 +47,6 @@ export default function AllAvailablePage() {
   }, [dateToProfiles, profiles]);
 
   const profileColor = (id) => profiles.find((p) => p.id === id)?.color || '#999';
-
   const dotsFor = (date) => {
     const ids = dateToProfiles.get(date);
     if (!ids) return [];
@@ -70,16 +55,12 @@ export default function AllAvailablePage() {
 
   const confirm = async () => {
     if (!chosen) return;
-    setError('');
-    setSubmitting(true);
+    setError(''); setSubmitting(true);
     try {
       await api.post(`/api/rooms/${roomId}/confirm`, { date: chosen });
-      // The room:confirmed socket event will update the store, ConfirmedView shows
     } catch (err) {
       setError(err.response?.data?.error?.message || '확정에 실패했습니다.');
-    } finally {
-      setSubmitting(false);
-    }
+    } finally { setSubmitting(false); }
   };
 
   if (room?.confirmed_date) {

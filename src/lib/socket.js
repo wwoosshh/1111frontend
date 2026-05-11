@@ -1,3 +1,4 @@
+// frontend/src/lib/socket.js
 import { io } from 'socket.io-client';
 
 let currentSocket = null;
@@ -20,7 +21,13 @@ export const disconnectSocket = () => {
   }
 };
 
-export const emitDateToggle = (profileId, date) => {
-  const s = currentSocket;
-  s?.emit('date:toggle', { profileId, date });
+export const emitRoomSubscribe = (roomId) =>
+  new Promise((resolve) => {
+    const s = currentSocket;
+    if (!s) return resolve({ ok: false, code: 'NO_SOCKET' });
+    s.emit('room:subscribe', { roomId }, resolve);
+  });
+
+export const emitDateToggle = (date) => {
+  currentSocket?.emit('date:toggle', { date });
 };

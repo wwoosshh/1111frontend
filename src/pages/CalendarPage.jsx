@@ -1,6 +1,6 @@
-import { useEffect, useMemo } from 'react';
+// frontend/src/pages/CalendarPage.jsx
+import { useMemo } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { clearSession, loadSession } from '../lib/session.js';
 import { emitDateToggle } from '../lib/socket.js';
 import { useRoom } from '../hooks/useRoom.js';
 import { useSocket } from '../hooks/useSocket.js';
@@ -11,29 +11,12 @@ import Calendar from '../components/Calendar.jsx';
 export default function CalendarPage() {
   const { roomId } = useParams();
   const nav = useNavigate();
-  const { error: roomError } = useRoom(roomId);
+  useRoom(roomId);
   useSocket(roomId);
 
   const profiles = useRoomStore((s) => s.profiles);
   const selections = useRoomStore((s) => s.selections);
-
-  const session = loadSession(roomId);
-  const myProfileId = session?.profileId;
-
-  useEffect(() => {
-    if (!session?.accessToken) {
-      nav(`/room/${roomId}`);
-    } else if (!myProfileId) {
-      nav(`/room/${roomId}/profile`);
-    }
-  }, [roomId, nav, session?.accessToken, myProfileId]);
-
-  useEffect(() => {
-    if (roomError) {
-      clearSession(roomId);
-      nav(`/room/${roomId}`);
-    }
-  }, [roomError, roomId, nav]);
+  const myProfileId = useRoomStore((s) => s.myProfileId);
 
   const me = profiles.find((p) => p.id === myProfileId);
   const myColor = me?.color || '#F4A6A6';
@@ -45,7 +28,7 @@ export default function CalendarPage() {
 
   const handleToggle = (dateStr) => {
     if (!myProfileId) return;
-    emitDateToggle(myProfileId, dateStr);
+    emitDateToggle(dateStr);
   };
 
   return (
@@ -61,7 +44,7 @@ export default function CalendarPage() {
       />
       <div className="flex gap-2 mt-5 justify-center">
         <Link to={`/room/${roomId}/all`} className="px-4 py-1.5 bg-brand text-white rounded text-sm">저장</Link>
-        <button type="button" onClick={() => nav(-1)} className="px-4 py-1.5 border border-brand text-brand rounded text-sm">뒤로</button>
+        <button type="button" onClick={() => nav('/rooms')} className="px-4 py-1.5 border border-brand text-brand rounded text-sm">뒤로</button>
       </div>
     </PageShell>
   );

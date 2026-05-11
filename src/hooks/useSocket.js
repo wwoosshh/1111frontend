@@ -1,22 +1,19 @@
+// frontend/src/hooks/useSocket.js
 import { useEffect } from 'react';
-import { connectSocket, disconnectSocket } from '../lib/socket.js';
+import { connectSocket, disconnectSocket, emitRoomSubscribe } from '../lib/socket.js';
 import { useRoomStore } from '../store/roomStore.js';
-import { loadSession } from '../lib/session.js';
+import { useAuthStore } from '../store/authStore.js';
 
 export const useSocket = (roomId) => {
-  // Read token fresh inside effect; rerun if it changes (e.g., after auth)
-  const session = roomId ? loadSession(roomId) : null;
-  const token = session?.accessToken;
-  const profileId = session?.profileId;
+  const accessToken = useAuthStore((s) => s.accessToken);
 
   useEffect(() => {
-    if (!roomId || !token) return;
+    if (!roomId || !accessToken) return;
 
-    const sock = connectSocket(token);
+    const sock = connectSocket(accessToken);
 
-    sock.on('connect', () => {
-      if (profileId) sock.emit('profile:join', { profileId });
-    });
+    const subscribe = () => emitRoomSubscribe(roomId);
+    sock.on('connect', subscribe);
 
     sock.on('profile:created', ({ profile }) => useRoomStore.getState().addProfile(profile));
     sock.on('profile:deleted', ({ profileId: pid }) => useRoomStore.getState().removeProfile(pid));
@@ -26,5 +23,5 @@ export const useSocket = (roomId) => {
     sock.on('presence:update', ({ activeProfileIds }) => useRoomStore.getState().setActiveProfileIds(activeProfileIds));
 
     return () => disconnectSocket();
-  }, [roomId, token, profileId]);
+  }, [roomId, accessToken]);
 };
