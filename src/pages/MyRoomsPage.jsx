@@ -3,6 +3,10 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../lib/api.js';
 import PageShell from '../components/PageShell.jsx';
+import Button from '../components/ui/Button.jsx';
+import Stamp from '../components/ui/Stamp.jsx';
+import TicketDivider from '../components/ui/TicketDivider.jsx';
+import PrintingLoader from '../components/ui/PrintingLoader.jsx';
 
 const inviteLink = (roomId) =>
   typeof window === 'undefined'
@@ -30,13 +34,13 @@ export default function MyRoomsPage() {
 
   const flash = (msg) => {
     setToast(msg);
-    setTimeout(() => setToast(''), 1500);
+    setTimeout(() => setToast(''), 1800);
   };
 
   const copyLink = async (roomId) => {
     try {
       await navigator.clipboard.writeText(inviteLink(roomId));
-      flash('링크가 복사되었습니다');
+      flash('링크 복사 완료');
     } catch {
       flash('복사 실패 — 직접 선택해 복사하세요');
     }
@@ -85,59 +89,91 @@ export default function MyRoomsPage() {
 
   return (
     <PageShell>
-      <h2 className="text-center mb-3">마이페이지</h2>
+      <TicketDivider>MY ROOMS</TicketDivider>
 
-      <div className="mb-2 text-xs text-brand-ink/70 px-1">방 목록</div>
-      {loading && <p className="text-center text-xs text-brand-ink/60">불러오는 중...</p>}
+      {loading && <PrintingLoader text="LOADING" />}
       {!loading && rooms.length === 0 && (
-        <p className="text-center text-xs text-brand-ink/60 py-3">아직 방이 없습니다. 아래 "방 만들기" 또는 "방 추가하기"를 사용하세요.</p>
+        <div className="text-center py-6 px-2">
+          <p className="font-receipt text-[11px] text-ink-faint">아직 방이 없습니다.</p>
+          <p className="font-body text-xs text-ink-soft mt-1">아래에서 새 방을 만들거나 친구방에 입장해보세요.</p>
+        </div>
       )}
 
-      <ul className="divide-y divide-dashed divide-brand-accent/30 px-1">
-        {rooms.map((r) => {
+      <ul className="flex flex-col gap-3 mt-2">
+        {rooms.map((r, idx) => {
           const isOpen = openMenu === r.id;
           return (
-            <li key={r.id} className="py-2">
-              <button type="button"
-                onClick={() => setOpenMenu(isOpen ? null : r.id)}
-                className="w-full flex justify-between items-center text-left">
-                <span className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded" style={{ background: r.theme || '#FCE4E4' }} />
-                  <span>{r.name}</span>
-                  {r.isOwner && <span className="text-[10px] text-brand-accent">방장</span>}
-                </span>
-                <span className="text-xs text-brand-ink/60">
-                  {r.confirmed_date ? `확정 ${String(r.confirmed_date).slice(0, 10)}` : '진행 중'}
-                </span>
-              </button>
-              {isOpen && (
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <button disabled={busy} onClick={() => enterRoom(r.id)} className="text-xs px-3 py-1 bg-brand text-white rounded">방 들어가기</button>
-                  <button disabled={busy} onClick={() => copyLink(r.id)} className="text-xs px-3 py-1 border border-brand text-brand rounded">방 링크 복사</button>
-                  {r.isOwner && (
-                    <>
-                      <button disabled={busy} onClick={() => changePassword(r.id)} className="text-xs px-3 py-1 border border-brand text-brand rounded">비밀번호 변경</button>
-                      <button disabled={busy} onClick={() => deleteRoom(r.id)} className="text-xs px-3 py-1 border border-red-500 text-red-600 rounded">방 삭제</button>
+            <li
+              key={r.id}
+              className="animate-fade-up"
+              style={{ animationDelay: `${idx * 60}ms` }}
+            >
+              <div
+                className="relative border border-dashed border-ink-faint/50 rounded-sm bg-paper-deep/40"
+                style={{ borderLeftColor: r.theme || 'var(--ink-faint)', borderLeftStyle: 'solid', borderLeftWidth: 4 }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpenMenu(isOpen ? null : r.id)}
+                  className="w-full px-3 py-2.5 text-left flex justify-between items-start gap-2"
+                  aria-expanded={isOpen}
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-body text-sm text-ink truncate">{r.name}</span>
+                      {r.isOwner && <Stamp size="xs" rotate={-6}>OWNER</Stamp>}
                       {r.confirmed_date && (
-                        <button disabled={busy} onClick={() => cancelConfirm(r.id)} className="text-xs px-3 py-1 border border-brand-accent text-brand-accent rounded">확정 취소</button>
+                        <Stamp size="xs" rotate={6} color="var(--seal)">CONFIRMED</Stamp>
                       )}
-                    </>
-                  )}
-                </div>
-              )}
+                    </div>
+                    <div className="font-receipt text-[10px] tracking-[0.2em] text-ink-faint mt-1 uppercase">
+                      {r.confirmed_date
+                        ? `DATE · ${String(r.confirmed_date).slice(0, 10)}`
+                        : 'IN PROGRESS'}
+                    </div>
+                  </div>
+                  <span className="font-receipt text-xs text-ink-faint mt-1">{isOpen ? '▾' : '▸'}</span>
+                </button>
+                {isOpen && (
+                  <div
+                    className="border-t border-dashed border-ink-faint/40 px-3 py-2 flex flex-wrap gap-2 animate-fade-up"
+                  >
+                    <Button disabled={busy} onClick={() => enterRoom(r.id)}>ENTER</Button>
+                    <Button disabled={busy} variant="outline" onClick={() => copyLink(r.id)}>COPY LINK</Button>
+                    {r.isOwner && (
+                      <>
+                        <Button disabled={busy} variant="outline" onClick={() => changePassword(r.id)}>NEW PW</Button>
+                        <Button disabled={busy} variant="outline" onClick={() => deleteRoom(r.id)}>DELETE</Button>
+                        {r.confirmed_date && (
+                          <Button disabled={busy} variant="outline" onClick={() => cancelConfirm(r.id)}>UNCONFIRM</Button>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
             </li>
           );
         })}
       </ul>
 
-      <div className="mt-5 grid grid-cols-3 gap-2 px-1">
-        <Link to="/room/new" className="text-xs text-center px-2 py-2 bg-brand text-white rounded">방 만들기</Link>
-        <Link to="/room/add" className="text-xs text-center px-2 py-2 border border-brand text-brand rounded">방 추가하기</Link>
-        <Link to="/settings" className="text-xs text-center px-2 py-2 border border-brand-accent text-brand-accent rounded">설정</Link>
+      <hr className="ticket-divider mt-5" />
+
+      <div className="grid grid-cols-3 gap-2">
+        <Button as={Link} to="/room/new" className="text-center">CREATE</Button>
+        <Button as={Link} to="/room/add" variant="outline" className="text-center">JOIN</Button>
+        <Button as={Link} to="/settings" variant="outline" className="text-center">SETTINGS</Button>
       </div>
 
-      {err && <p className="text-xs text-red-600 text-center mt-3">{err}</p>}
-      {toast && <p className="text-xs text-center text-brand-ink/80 mt-3">{toast}</p>}
+      {err && <p className="font-receipt text-[11px] text-stamp text-center mt-3">{err}</p>}
+      {toast && (
+        <div className="fixed left-1/2 -translate-x-1/2 top-4 z-50 animate-fade-up">
+          <div className="paper-surface shadow-paper border border-dashed border-ink-faint px-4 py-2 text-xs font-receipt text-ink"
+               style={{ transform: 'rotate(-1.5deg)' }}>
+            {toast}
+          </div>
+        </div>
+      )}
     </PageShell>
   );
 }

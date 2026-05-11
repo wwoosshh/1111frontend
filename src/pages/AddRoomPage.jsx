@@ -3,6 +3,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/api.js';
 import PageShell from '../components/PageShell.jsx';
+import Button from '../components/ui/Button.jsx';
+import FieldLabel from '../components/ui/FieldLabel.jsx';
+import TicketDivider from '../components/ui/TicketDivider.jsx';
 
 const extractRoomId = (input) => {
   if (!input) return null;
@@ -39,23 +42,23 @@ export default function AddRoomPage() {
 
   return (
     <PageShell>
-      <h2 className="text-center mb-4">방 추가하기</h2>
-      <form onSubmit={submit} className="flex flex-col gap-3 px-2">
-        <label className="text-sm">
-          방 링크 (또는 방 ID)
+      <TicketDivider>JOIN ROOM</TicketDivider>
+      <form onSubmit={submit} className="flex flex-col gap-4 px-1 mt-2">
+        <div>
+          <FieldLabel>INVITE LINK</FieldLabel>
           <input value={link} onChange={(e) => setLink(e.target.value)} required
-            placeholder="https://.../room/<id>/join 또는 UUID"
-            className="w-full mt-1 px-3 py-2 rounded border border-brand-accent/30 text-xs" />
-        </label>
-        <label className="text-sm">
-          비밀번호
+            placeholder=".../room/<id>/join 또는 UUID"
+            className="input-ticket w-full text-xs" />
+        </div>
+        <div>
+          <FieldLabel>ROOM PASSWORD</FieldLabel>
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
-            className="w-full mt-1 px-3 py-2 rounded border border-brand-accent/30 text-center" />
-        </label>
-        {err && <p className="text-xs text-red-600 text-center">{err}</p>}
-        <div className="flex gap-2 justify-center mt-2">
-          <button disabled={loading} className="px-5 py-1.5 bg-brand text-white rounded">{loading ? '확인 중...' : '입장'}</button>
-          <button type="button" onClick={() => nav('/rooms')} className="px-5 py-1.5 border border-brand text-brand rounded">취소</button>
+            className="input-ticket w-full text-sm text-center" placeholder="••••" />
+        </div>
+        {err && <p className="font-receipt text-[11px] text-stamp text-center">{err}</p>}
+        <div className="flex gap-3 justify-center mt-2">
+          <Button disabled={loading}>{loading ? 'CHECKING…' : 'ENTER'}</Button>
+          <Button type="button" variant="outline" onClick={() => nav('/rooms')}>CANCEL</Button>
         </div>
       </form>
     </PageShell>

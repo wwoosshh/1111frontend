@@ -3,6 +3,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/api.js';
 import PageShell from '../components/PageShell.jsx';
+import Button from '../components/ui/Button.jsx';
+import FieldLabel from '../components/ui/FieldLabel.jsx';
+import TicketDivider from '../components/ui/TicketDivider.jsx';
 
 const THEMES = ['#FCE4E4', '#E4F4E0', '#E4E4FC', '#FFF4D9', '#E0F0F8', '#F8E0F0'];
 
@@ -27,31 +30,36 @@ export default function CreateRoomPage() {
 
   return (
     <PageShell>
-      <h2 className="text-center mb-4">방 만들기</h2>
-      <form onSubmit={submit} className="flex flex-col gap-3 px-2">
-        <label className="text-sm">
-          이름
+      <TicketDivider>NEW ROOM</TicketDivider>
+      <form onSubmit={submit} className="flex flex-col gap-4 px-1 mt-2">
+        <div>
+          <FieldLabel>NAME</FieldLabel>
           <input value={name} onChange={(e) => setName(e.target.value)} required maxLength={50}
-            className="w-full mt-1 px-3 py-2 rounded border border-brand-accent/30" />
-        </label>
-        <label className="text-sm">
-          방 비밀번호 (숫자 4~8자리)
-          <input value={password} onChange={(e) => setPassword(e.target.value)} required pattern="[0-9]{4,8}"
-            className="w-full mt-1 px-3 py-2 rounded border border-brand-accent/30" />
-        </label>
-        <div className="flex gap-2 flex-wrap items-center">
-          <span className="text-sm mr-1">테마 색상</span>
-          {THEMES.map((c) => (
-            <button type="button" key={c} onClick={() => setTheme(c)}
-              className={`w-7 h-7 rounded ${theme === c ? 'ring-2 ring-brand-accent' : ''}`}
-              style={{ background: c }} />
-          ))}
+            className="input-ticket w-full text-sm" placeholder="방 이름" />
         </div>
-        {err && <p className="text-xs text-red-600">{err}</p>}
-        <p className="text-xs text-brand-ink/60">초대할 친구에게 방 링크와 비밀번호를 공유하세요.</p>
-        <div className="flex gap-2 justify-center mt-2">
-          <button disabled={loading} className="px-5 py-1.5 bg-brand text-white rounded">{loading ? '생성 중...' : '만들기'}</button>
-          <button type="button" onClick={() => nav('/rooms')} className="px-5 py-1.5 border border-brand text-brand rounded">취소</button>
+        <div>
+          <FieldLabel hint="숫자 4~8">ROOM PASSWORD</FieldLabel>
+          <input value={password} onChange={(e) => setPassword(e.target.value)} required pattern="[0-9]{4,8}"
+            className="input-ticket w-full text-sm" placeholder="••••" />
+        </div>
+        <div>
+          <FieldLabel>THEME</FieldLabel>
+          <div className="flex gap-2 flex-wrap items-center mt-2">
+            {THEMES.map((c) => (
+              <button type="button" key={c} onClick={() => setTheme(c)}
+                aria-label={`테마 ${c}`}
+                className={`w-9 h-9 rounded-sm border-2 transition-transform ${theme === c ? 'border-ink scale-110' : 'border-transparent'}`}
+                style={{ background: c }} />
+            ))}
+          </div>
+        </div>
+        {err && <p className="font-receipt text-[11px] text-stamp text-center">{err}</p>}
+        <p className="font-receipt text-[10px] text-ink-faint text-center mt-1">
+          초대할 친구에게 방 링크와 비밀번호를 공유하세요.
+        </p>
+        <div className="flex gap-3 justify-center mt-2">
+          <Button disabled={loading}>{loading ? 'PRINTING…' : 'CREATE'}</Button>
+          <Button type="button" variant="outline" onClick={() => nav('/rooms')}>CANCEL</Button>
         </div>
       </form>
     </PageShell>

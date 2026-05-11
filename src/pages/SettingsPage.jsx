@@ -3,6 +3,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/api.js';
 import PageShell from '../components/PageShell.jsx';
+import Button from '../components/ui/Button.jsx';
+import FieldLabel from '../components/ui/FieldLabel.jsx';
+import TicketDivider from '../components/ui/TicketDivider.jsx';
 import { useAuthStore } from '../store/authStore.js';
 
 const PALETTE = ['#F4C1C1', '#A6D9B5', '#C5B6F0', '#F4A6A6', '#FFD89E', '#9DC8E0'];
@@ -34,27 +37,33 @@ export default function SettingsPage() {
 
   return (
     <PageShell>
-      <h2 className="text-center mb-4">설정</h2>
-      <form onSubmit={submit} className="flex flex-col gap-3 px-2">
-        <p className="text-xs text-brand-ink/60">아이디: <span className="font-mono">{user.loginId}</span></p>
-        <label className="text-sm">
-          표시 이름
-          <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} required maxLength={20}
-            className="w-full mt-1 px-3 py-2 rounded border border-brand-accent/30" />
-        </label>
-        <div className="flex gap-2 flex-wrap items-center">
-          <span className="text-sm mr-1">기본 색상</span>
-          {PALETTE.map((c) => (
-            <button type="button" key={c} onClick={() => setDefaultColor(c)}
-              className={`w-7 h-7 rounded ${defaultColor === c ? 'ring-2 ring-brand-accent' : ''}`}
-              style={{ background: c }} />
-          ))}
+      <TicketDivider>SETTINGS</TicketDivider>
+      <form onSubmit={submit} className="flex flex-col gap-4 px-1 mt-2">
+        <div className="flex items-baseline justify-between">
+          <span className="label-caps">ID</span>
+          <span className="font-receipt text-sm text-ink">{user.loginId}</span>
         </div>
-        {err && <p className="text-xs text-red-600 text-center">{err}</p>}
-        {msg && <p className="text-xs text-brand-ink/80 text-center">{msg}</p>}
-        <div className="flex gap-2 justify-center mt-2">
-          <button disabled={loading} className="px-5 py-1.5 bg-brand text-white rounded">{loading ? '저장 중...' : '저장'}</button>
-          <button type="button" onClick={() => nav('/rooms')} className="px-5 py-1.5 border border-brand text-brand rounded">뒤로</button>
+        <div>
+          <FieldLabel>DISPLAY NAME</FieldLabel>
+          <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} required maxLength={20}
+            className="input-ticket w-full text-sm" />
+        </div>
+        <div>
+          <FieldLabel>COLOR</FieldLabel>
+          <div className="flex gap-2 flex-wrap items-center mt-2">
+            {PALETTE.map((c) => (
+              <button type="button" key={c} onClick={() => setDefaultColor(c)}
+                aria-label={`색상 ${c}`}
+                className={`w-7 h-7 rounded-sm border-2 ${defaultColor === c ? 'border-ink' : 'border-transparent'}`}
+                style={{ background: c }} />
+            ))}
+          </div>
+        </div>
+        {err && <p className="font-receipt text-[11px] text-stamp text-center">{err}</p>}
+        {msg && <p className="font-receipt text-[11px] text-ink-soft text-center">{msg}</p>}
+        <div className="flex gap-3 justify-center mt-2">
+          <Button disabled={loading}>{loading ? 'SAVING…' : 'SAVE'}</Button>
+          <Button type="button" variant="outline" onClick={() => nav('/rooms')}>BACK</Button>
         </div>
       </form>
     </PageShell>

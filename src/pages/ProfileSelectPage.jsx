@@ -4,6 +4,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import api from '../lib/api.js';
 import PageShell from '../components/PageShell.jsx';
 import ProfileBadge from '../components/ProfileBadge.jsx';
+import Button from '../components/ui/Button.jsx';
+import FieldLabel from '../components/ui/FieldLabel.jsx';
+import TicketDivider from '../components/ui/TicketDivider.jsx';
 import { useRoom } from '../hooks/useRoom.js';
 import { useSocket } from '../hooks/useSocket.js';
 import { useRoomStore } from '../store/roomStore.js';
@@ -29,9 +32,7 @@ export default function ProfileSelectPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (roomError) {
-      nav('/rooms', { replace: true });
-    }
+    if (roomError) nav('/rooms', { replace: true });
   }, [roomError, nav]);
 
   const select = (profile) => {
@@ -54,39 +55,59 @@ export default function ProfileSelectPage() {
 
   return (
     <PageShell>
-      <p className="text-center text-xs text-brand-ink/60">{room?.name || '방'}</p>
-      <h2 className="text-center font-semibold mt-1 mb-4">프로필 선택</h2>
-      <p className="text-center text-xs text-brand-ink/60 mb-3">
-        들어가고 싶은 프로필을 누르거나, 새 프로필을 추가하세요.
+      <TicketDivider>PICK A SEAT</TicketDivider>
+      <p className="font-receipt text-[10px] text-ink-faint text-center tracking-[0.2em] uppercase mb-3">
+        들어가고 싶은 프로필을 누르거나, 새로 만드세요
       </p>
-      <div className="grid grid-cols-3 gap-3 px-2">
-        {profiles.map((p) => (
-          <ProfileBadge key={p.id} name={p.name} color={p.color} onClick={() => select(p)} />
+      <div className="grid grid-cols-3 gap-y-5 gap-x-3 px-1">
+        {profiles.map((p, i) => (
+          <div key={p.id} className="animate-fade-up" style={{ animationDelay: `${i * 60}ms` }}>
+            <ProfileBadge name={p.name} color={p.color} onClick={() => select(p)} rotate={(i % 3) - 1} />
+          </div>
         ))}
-        <button type="button" onClick={() => setAdding((v) => !v)} className="flex flex-col items-center gap-1">
-          <div className="w-14 h-14 rounded-md border-2 border-dashed border-brand-accent/50 flex items-center justify-center text-xl">+</div>
-          <span className="text-xs">프로필 추가</span>
+        <button
+          type="button"
+          onClick={() => setAdding((v) => !v)}
+          className="flex flex-col items-center gap-1.5 group"
+          aria-expanded={adding}
+        >
+          <div
+            className="w-16 h-16 rounded-sm border-2 border-dashed border-ink-faint flex items-center justify-center font-display text-2xl text-ink-faint transition-transform group-hover:rotate-2 group-hover:text-stamp group-hover:border-stamp"
+            style={{ background: 'rgba(255, 248, 238, 0.4)' }}
+          >
+            +
+          </div>
+          <span className="font-body text-xs text-ink-soft">새 프로필</span>
         </button>
       </div>
+
       {adding && (
-        <form onSubmit={submitNew} className="mt-5 flex flex-col gap-2 px-2">
-          <input value={name} onChange={(e) => setName(e.target.value)} required maxLength={20}
-            placeholder="이름" className="px-3 py-2 rounded border border-brand-accent/30" />
-          <div className="flex gap-2 flex-wrap">
-            {PALETTE.map((c) => (
-              <button type="button" key={c} onClick={() => setColor(c)}
-                className={`w-7 h-7 rounded ${color === c ? 'ring-2 ring-brand-accent' : ''}`}
-                style={{ background: c }} />
-            ))}
+        <form onSubmit={submitNew} className="mt-6 flex flex-col gap-3 px-1 animate-fade-up">
+          <hr className="ticket-divider" />
+          <div>
+            <FieldLabel>PROFILE NAME</FieldLabel>
+            <input value={name} onChange={(e) => setName(e.target.value)} required maxLength={20}
+              placeholder="이름" className="input-ticket w-full text-sm" />
           </div>
-          {err && <p className="text-xs text-red-600">{err}</p>}
-          <button disabled={submitting} className="mt-2 px-4 py-1.5 bg-brand text-white rounded">
-            {submitting ? '추가 중...' : '추가하고 들어가기'}
-          </button>
+          <div>
+            <FieldLabel>COLOR</FieldLabel>
+            <div className="flex gap-2 flex-wrap mt-2">
+              {PALETTE.map((c) => (
+                <button type="button" key={c} onClick={() => setColor(c)}
+                  className={`w-7 h-7 rounded-sm border-2 ${color === c ? 'border-ink' : 'border-transparent'}`}
+                  style={{ background: c }} />
+              ))}
+            </div>
+          </div>
+          {err && <p className="font-receipt text-[11px] text-stamp text-center">{err}</p>}
+          <Button disabled={submitting} className="mt-1">
+            {submitting ? 'STAMPING…' : 'CREATE + ENTER'}
+          </Button>
         </form>
       )}
-      <div className="flex gap-2 mt-5 justify-center">
-        <button type="button" onClick={() => nav('/rooms')} className="px-4 py-1.5 border border-brand text-brand rounded text-sm">뒤로</button>
+
+      <div className="flex justify-center mt-6">
+        <Button variant="ghost" onClick={() => nav('/rooms')}>← 방 목록으로</Button>
       </div>
     </PageShell>
   );

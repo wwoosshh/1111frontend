@@ -3,6 +3,9 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import api from '../lib/api.js';
 import PageShell from '../components/PageShell.jsx';
+import Button from '../components/ui/Button.jsx';
+import FieldLabel from '../components/ui/FieldLabel.jsx';
+import TicketDivider from '../components/ui/TicketDivider.jsx';
 import { useAuthStore } from '../store/authStore.js';
 
 export default function LoginPage() {
@@ -40,19 +43,28 @@ export default function LoginPage() {
 
   return (
     <PageShell>
-      <h2 className="text-center mb-4">로그인</h2>
-      <form onSubmit={submit} className="flex flex-col gap-3 px-2">
-        <input value={loginId} onChange={(e) => setLoginId(e.target.value)} required placeholder="아이디"
-          className="px-3 py-2 rounded border border-brand-accent/30" />
-        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="비밀번호"
-          className="px-3 py-2 rounded border border-brand-accent/30" />
-        {err && <p className="text-xs text-red-600 text-center">{err}</p>}
-        <button disabled={loading} className="mt-2 px-5 py-1.5 bg-brand text-white rounded">
-          {loading ? '확인 중...' : '로그인'}
-        </button>
+      <TicketDivider>SIGN IN</TicketDivider>
+      <form onSubmit={submit} className="flex flex-col gap-4 px-1 mt-2">
+        <div>
+          <FieldLabel>ID</FieldLabel>
+          <input value={loginId} onChange={(e) => setLoginId(e.target.value)} required placeholder="아이디"
+            className="input-ticket w-full text-sm" autoComplete="username" />
+        </div>
+        <div>
+          <FieldLabel>PASSWORD</FieldLabel>
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="••••••••"
+            className="input-ticket w-full text-sm" autoComplete="current-password" />
+        </div>
+        {err && <p className="font-receipt text-[11px] text-stamp text-center">{err}</p>}
+        <Button disabled={loading} className="mt-2 w-full">
+          {loading ? 'CHECKING…' : 'ENTER'}
+        </Button>
       </form>
-      <p className="text-xs text-center mt-4 text-brand-ink/60">
-        계정이 없으신가요? <Link to="/signup" className="underline">회원가입</Link>
+      <p className="font-receipt text-[11px] text-center mt-5 text-ink-soft">
+        계정이 없으신가요?{' '}
+        <Link to="/signup" className="underline decoration-dashed underline-offset-4 hover:text-stamp">
+          회원가입
+        </Link>
       </p>
     </PageShell>
   );

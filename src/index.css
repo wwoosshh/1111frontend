@@ -2,10 +2,202 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --paper: #FAF1E4;
+  --paper-deep: #F0E5D0;
+  --paper-edge: #E3D2B0;
+  --ink: #2A1F1A;
+  --ink-soft: #5A4538;
+  --ink-faint: #8B7259;
+  --stamp: #C8463A;
+  --stamp-deep: #9E2E26;
+  --seal: #1E5A6F;
+  /* Per-room accent — overridden by PageShell when inside a room */
+  --room-theme: #C8463A;
+  --room-theme-soft: rgba(200, 70, 58, 0.12);
+}
+
 html, body, #root {
   height: 100%;
 }
+
 body {
-  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
-  color: #5A2A2A;
+  font-family: 'Gowun Dodum', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--ink);
+  background-color: var(--paper);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Page background = warm cream + faint room theme wash + grain */
+.app-bg {
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(circle at 20% 0%, var(--room-theme-soft), transparent 55%),
+    radial-gradient(circle at 100% 100%, var(--room-theme-soft), transparent 60%);
+  position: relative;
+}
+.app-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg viewBox='0 0 240 240' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.16  0 0 0 0 0.12  0 0 0 0 0.10  0 0 0 0.06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  opacity: 0.6;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+/* Paper card surface — warm cream with grain overlay */
+.paper-surface {
+  background-color: var(--paper);
+  background-image:
+    url("data:image/svg+xml;utf8,<svg viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'><filter id='g'><feTurbulence type='turbulence' baseFrequency='0.7' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.2  0 0 0 0 0.14  0 0 0 0 0.10  0 0 0 0.04 0'/></filter><rect width='100%' height='100%' filter='url(%23g)'/></svg>");
+  background-blend-mode: multiply;
+}
+
+/* Receipt perforation edges (top/bottom of card) — via mask */
+.perf-top {
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10' preserveAspectRatio='none'><path d='M0,10 L0,5 L4,0 L8,5 L12,0 L16,5 L20,0 L24,5 L28,0 L32,5 L36,0 L40,5 L44,0 L48,5 L52,0 L56,5 L60,0 L64,5 L68,0 L72,5 L76,0 L80,5 L84,0 L88,5 L92,0 L96,5 L100,0 L100,10 Z' fill='black'/></svg>");
+  mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10' preserveAspectRatio='none'><path d='M0,10 L0,5 L4,0 L8,5 L12,0 L16,5 L20,0 L24,5 L28,0 L32,5 L36,0 L40,5 L44,0 L48,5 L52,0 L56,5 L60,0 L64,5 L68,0 L72,5 L76,0 L80,5 L84,0 L88,5 L92,0 L96,5 L100,0 L100,10 Z' fill='black'/></svg>");
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+.perf-bottom {
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10' preserveAspectRatio='none'><path d='M0,0 L100,0 L100,5 L96,10 L92,5 L88,10 L84,5 L80,10 L76,5 L72,10 L68,5 L64,10 L60,5 L56,10 L52,5 L48,10 L44,5 L40,10 L36,5 L32,10 L28,5 L24,10 L20,5 L16,10 L12,5 L8,10 L4,5 L0,10 Z' fill='black'/></svg>");
+  mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 10' preserveAspectRatio='none'><path d='M0,0 L100,0 L100,5 L96,10 L92,5 L88,10 L84,5 L80,10 L76,5 L72,10 L68,5 L64,10 L60,5 L56,10 L52,5 L48,10 L44,5 L40,10 L36,5 L32,10 L28,5 L24,10 L20,5 L16,10 L12,5 L8,10 L4,5 L0,10 Z' fill='black'/></svg>");
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* CSS-only barcode strip */
+.barcode {
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--ink) 0 1px,
+    transparent 1px 3px,
+    var(--ink) 3px 5px,
+    transparent 5px 6px,
+    var(--ink) 6px 9px,
+    transparent 9px 11px,
+    var(--ink) 11px 12px,
+    transparent 12px 14px
+  );
+}
+
+/* Dashed-underline input */
+.input-ticket {
+  background: transparent;
+  border: none;
+  border-bottom: 2px dashed var(--ink-faint);
+  border-radius: 0;
+  padding: 6px 2px;
+  color: var(--ink);
+  font-family: 'Courier Prime', 'Courier New', monospace;
+  outline: none;
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+.input-ticket:focus {
+  border-bottom-color: var(--room-theme);
+  border-bottom-style: solid;
+}
+
+/* Tiny caps label */
+.label-caps {
+  font-family: 'Courier Prime', 'Courier New', monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 10px;
+  color: var(--ink-faint);
+}
+
+/* Dashed receipt divider */
+.ticket-divider {
+  border: none;
+  border-top: 1.5px dashed var(--ink-faint);
+  margin: 12px 0;
+}
+
+/* Button — stamp variant: thick border, pressed feel */
+.btn-stamp {
+  font-family: 'DotGothic16', monospace;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--room-theme);
+  color: #FFF8EE;
+  border: 2px solid var(--ink);
+  padding: 8px 18px;
+  box-shadow: 3px 3px 0 var(--ink);
+  cursor: pointer;
+  transition: transform 100ms ease, box-shadow 100ms ease;
+  position: relative;
+}
+.btn-stamp:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
+.btn-stamp:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+.btn-stamp:disabled { opacity: 0.55; cursor: not-allowed; box-shadow: 3px 3px 0 var(--ink); transform: none; }
+
+.btn-outline {
+  font-family: 'DotGothic16', monospace;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: transparent;
+  color: var(--ink);
+  border: 2px dashed var(--ink);
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+.btn-outline:hover { background-color: var(--paper-deep); }
+
+.btn-ghost {
+  font-family: 'Courier Prime', monospace;
+  font-size: 12px;
+  color: var(--ink-soft);
+  background: transparent;
+  border: none;
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.btn-ghost:hover { color: var(--stamp); }
+
+/* Stamp badge */
+.stamp-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DotGothic16', monospace;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 2px solid currentColor;
+  padding: 2px 8px;
+  border-radius: 4px;
+  transform: rotate(-4deg);
+  background: rgba(255, 248, 238, 0.5);
+}
+
+/* Profile stamp tile */
+.stamp-tile {
+  position: relative;
+  transition: transform 180ms ease;
+  cursor: pointer;
+}
+.stamp-tile:hover { transform: rotate(-2deg) translateY(-2px); }
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001s !important;
+  }
 }

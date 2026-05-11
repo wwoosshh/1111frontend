@@ -3,6 +3,9 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../lib/api.js';
 import PageShell from '../components/PageShell.jsx';
+import Button from '../components/ui/Button.jsx';
+import FieldLabel from '../components/ui/FieldLabel.jsx';
+import TicketDivider from '../components/ui/TicketDivider.jsx';
 
 export default function JoinRoomPage() {
   const { roomId } = useParams();
@@ -24,14 +27,17 @@ export default function JoinRoomPage() {
 
   return (
     <PageShell>
-      <h2 className="text-center mb-4">방 비밀번호</h2>
-      <form onSubmit={submit} className="flex flex-col gap-3 px-2">
-        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
-          className="w-full px-3 py-2 rounded border border-brand-accent/30 text-center" />
-        {err && <p className="text-xs text-red-600 text-center">{err}</p>}
-        <button disabled={loading} className="mt-2 px-5 py-1.5 bg-brand text-white rounded">
-          {loading ? '확인 중...' : '입장'}
-        </button>
+      <TicketDivider>ROOM PASSWORD</TicketDivider>
+      <form onSubmit={submit} className="flex flex-col gap-4 px-1 mt-2">
+        <div>
+          <FieldLabel>PASSWORD</FieldLabel>
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
+            className="input-ticket w-full text-center text-lg" placeholder="••••" />
+        </div>
+        {err && <p className="font-receipt text-[11px] text-stamp text-center">{err}</p>}
+        <Button disabled={loading} className="mt-2 w-full">
+          {loading ? 'CHECKING…' : 'ENTER'}
+        </Button>
       </form>
     </PageShell>
   );

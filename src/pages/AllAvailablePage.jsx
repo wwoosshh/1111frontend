@@ -7,6 +7,9 @@ import { useRoomStore } from '../store/roomStore.js';
 import api from '../lib/api.js';
 import PageShell from '../components/PageShell.jsx';
 import Calendar from '../components/Calendar.jsx';
+import Button from '../components/ui/Button.jsx';
+import TicketDivider from '../components/ui/TicketDivider.jsx';
+import Stamp from '../components/ui/Stamp.jsx';
 
 const formatDate = (raw) => {
   if (!raw) return '';
@@ -75,42 +78,98 @@ export default function AllAvailablePage() {
 
   return (
     <PageShell>
-      <p className="text-center text-sm font-semibold mb-3">모두 가능한 날짜</p>
+      <TicketDivider>ALL AVAILABLE</TicketDivider>
       <Calendar
         getDots={dotsFor}
         getHighlight={(d) => allAvailableDates.has(d) || chosen === d}
         onToggle={(d) => isOwner && allAvailableDates.has(d) && setChosen(d)}
       />
-      {error && <p className="text-xs text-red-600 text-center mt-3">{error}</p>}
-      <div className="flex gap-2 mt-5 justify-center">
+      {error && <p className="font-receipt text-[11px] text-stamp text-center mt-3">{error}</p>}
+      <hr className="ticket-divider" />
+      <div className="flex gap-3 mt-3 justify-center items-center">
         {isOwner ? (
-          <button type="button" onClick={confirm} disabled={!chosen || submitting}
-            className="px-4 py-1.5 bg-brand text-white rounded text-sm disabled:opacity-40">
-            {submitting ? '확정 중...' : '날짜 확정'}
-          </button>
+          <Button onClick={confirm} disabled={!chosen || submitting}>
+            {submitting ? 'STAMPING…' : 'CONFIRM DATE'}
+          </Button>
         ) : (
-          <span className="text-xs text-brand-ink/60 self-center">방장만 날짜를 확정할 수 있습니다.</span>
+          <span className="font-receipt text-[11px] text-ink-faint tracking-wider">
+            방장만 날짜를 확정할 수 있어요
+          </span>
         )}
-        <button type="button" onClick={() => nav(-1)} className="px-4 py-1.5 border border-brand text-brand rounded text-sm">뒤로</button>
+        <Button variant="outline" onClick={() => nav(-1)}>BACK</Button>
       </div>
     </PageShell>
   );
+}
+
+function ConfettiBits({ count = 22 }) {
+  // Paper-bit particles that fall around the stamp impact
+  const bits = [];
+  for (let i = 0; i < count; i++) {
+    const left = Math.random() * 100;
+    const delay = Math.random() * 600;
+    const duration = 900 + Math.random() * 800;
+    const size = 4 + Math.random() * 5;
+    const rotate = Math.random() * 360;
+    const color = ['var(--paper-edge)', 'var(--ink-faint)', 'var(--stamp)'][i % 3];
+    bits.push(
+      <span
+        key={i}
+        className="absolute top-0 will-change-transform"
+        style={{
+          left: `${left}%`,
+          width: size,
+          height: size,
+          background: color,
+          opacity: 0.7,
+          transform: `rotate(${rotate}deg)`,
+          animation: `paperBitFall ${duration}ms ${delay}ms ease-in forwards`,
+        }}
+      />
+    );
+  }
+  return <div aria-hidden className="absolute inset-0 overflow-hidden pointer-events-none">{bits}</div>;
 }
 
 function ConfirmedView({ roomName, date, profiles }) {
   const formatted = formatDate(date);
   return (
     <PageShell headerProps={{ date: formatted }} footerProps={{ date: formatted }}>
-      <p className="text-center text-sm font-semibold mb-3">{roomName}</p>
-      <ul className="divide-y divide-dashed divide-brand-accent/30 px-2">
+      <style>{`
+        @keyframes paperBitFall {
+          0% { transform: translate3d(0,-20px,0) rotate(0deg); opacity: 0; }
+          15% { opacity: 0.8; }
+          100% { transform: translate3d(0,420px,0) rotate(360deg); opacity: 0; }
+        }
+      `}</style>
+      <TicketDivider>CONFIRMED</TicketDivider>
+      <div className="relative animate-shake">
+        <ConfettiBits />
+        <div className="flex flex-col items-center py-5">
+          <Stamp size="xl" rotate={-12} className="animate-stamp-drop" color="var(--room-theme)">
+            ✓ CONFIRMED
+          </Stamp>
+          <div className="mt-6 text-center">
+            <div className="font-receipt text-[10px] tracking-[0.3em] text-ink-faint">DATE</div>
+            <div className="font-display text-3xl text-ink mt-1">{formatted}</div>
+          </div>
+        </div>
+      </div>
+      <hr className="ticket-divider" />
+      <p className="font-receipt text-[10px] tracking-[0.25em] text-ink-faint text-center uppercase">
+        {roomName}
+      </p>
+      <ul className="grid grid-cols-2 gap-y-1.5 gap-x-3 px-2 mt-3">
         {profiles.map((p) => (
-          <li key={p.id} className="py-2 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full" style={{ background: p.color }} />
-            <span>{p.name}</span>
+          <li key={p.id} className="flex items-center gap-2 font-body text-sm">
+            <span className="w-2.5 h-2.5 rounded-full ring-1 ring-ink/15" style={{ background: p.color }} />
+            <span className="truncate">{p.name}</span>
           </li>
         ))}
       </ul>
-      <p className="text-center text-2xl font-receipt mt-6 text-brand-accent">SEE YOU SOON</p>
+      <p className="font-script text-3xl text-stamp text-center mt-7" style={{ transform: 'rotate(-3deg)' }}>
+        See you soon!
+      </p>
     </PageShell>
   );
 }

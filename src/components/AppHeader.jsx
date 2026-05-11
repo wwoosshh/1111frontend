@@ -17,12 +17,12 @@ export default function AppHeader() {
   };
 
   return (
-    <div className="flex justify-between items-center text-xs text-brand-ink/70 px-1 py-2">
-      <span className="flex items-center gap-1">
+    <div className="flex justify-between items-center px-1 pt-2 pb-1 text-[10px] font-receipt tracking-[0.18em] text-ink-faint uppercase">
+      <span className="flex items-center gap-1.5">
         <span className="w-2 h-2 rounded-full" style={{ background: user.defaultColor }} />
-        {user.displayName}
+        <span className="font-body normal-case tracking-normal text-ink">{user.displayName}</span>
       </span>
-      <button type="button" onClick={logout} className="underline">로그아웃</button>
+      <button type="button" onClick={logout} className="btn-ghost">로그아웃</button>
     </div>
   );
 }
