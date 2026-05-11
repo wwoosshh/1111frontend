@@ -1,5 +1,5 @@
 // frontend/src/pages/AllAvailablePage.jsx
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useRoom } from '../hooks/useRoom.js';
 import { useSocket } from '../hooks/useSocket.js';
@@ -18,7 +18,7 @@ const formatDate = (raw) => {
 export default function AllAvailablePage() {
   const { roomId } = useParams();
   const nav = useNavigate();
-  useRoom(roomId);
+  const { error: roomError } = useRoom(roomId);
   useSocket(roomId);
 
   const room = useRoomStore((s) => s.room);
@@ -27,6 +27,10 @@ export default function AllAvailablePage() {
   const [chosen, setChosen] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (roomError) nav('/rooms', { replace: true });
+  }, [roomError, nav]);
 
   const dateToProfiles = useMemo(() => {
     const map = new Map();
@@ -53,6 +57,8 @@ export default function AllAvailablePage() {
     return [...ids].map(profileColor);
   };
 
+  const isOwner = !!room?.isOwner;
+
   const confirm = async () => {
     if (!chosen) return;
     setError(''); setSubmitting(true);
@@ -73,14 +79,18 @@ export default function AllAvailablePage() {
       <Calendar
         getDots={dotsFor}
         getHighlight={(d) => allAvailableDates.has(d) || chosen === d}
-        onToggle={(d) => allAvailableDates.has(d) && setChosen(d)}
+        onToggle={(d) => isOwner && allAvailableDates.has(d) && setChosen(d)}
       />
       {error && <p className="text-xs text-red-600 text-center mt-3">{error}</p>}
       <div className="flex gap-2 mt-5 justify-center">
-        <button type="button" onClick={confirm} disabled={!chosen || submitting}
-          className="px-4 py-1.5 bg-brand text-white rounded text-sm disabled:opacity-40">
-          {submitting ? '확정 중...' : '확정'}
-        </button>
+        {isOwner ? (
+          <button type="button" onClick={confirm} disabled={!chosen || submitting}
+            className="px-4 py-1.5 bg-brand text-white rounded text-sm disabled:opacity-40">
+            {submitting ? '확정 중...' : '날짜 확정'}
+          </button>
+        ) : (
+          <span className="text-xs text-brand-ink/60 self-center">방장만 날짜를 확정할 수 있습니다.</span>
+        )}
         <button type="button" onClick={() => nav(-1)} className="px-4 py-1.5 border border-brand text-brand rounded text-sm">뒤로</button>
       </div>
     </PageShell>

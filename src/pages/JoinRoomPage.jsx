@@ -16,7 +16,7 @@ export default function JoinRoomPage() {
     setErr(''); setLoading(true);
     try {
       await api.post(`/api/rooms/${roomId}/join`, { password });
-      nav(`/room/${roomId}/calendar`, { replace: true });
+      nav(`/room/${roomId}/profile`, { replace: true });
     } catch (e2) {
       setErr(e2.response?.data?.error?.message || '입장 실패');
     } finally { setLoading(false); }

@@ -6,13 +6,14 @@ import { useAuthStore } from '../store/authStore.js';
 
 export const useSocket = (roomId) => {
   const accessToken = useAuthStore((s) => s.accessToken);
+  const currentProfileId = useRoomStore((s) => s.currentProfileId);
 
   useEffect(() => {
     if (!roomId || !accessToken) return;
 
     const sock = connectSocket(accessToken);
 
-    const subscribe = () => emitRoomSubscribe(roomId);
+    const subscribe = () => emitRoomSubscribe(roomId, currentProfileId);
     sock.on('connect', subscribe);
 
     sock.on('profile:created', ({ profile }) => useRoomStore.getState().addProfile(profile));
@@ -23,5 +24,5 @@ export const useSocket = (roomId) => {
     sock.on('presence:update', ({ activeProfileIds }) => useRoomStore.getState().setActiveProfileIds(activeProfileIds));
 
     return () => disconnectSocket();
-  }, [roomId, accessToken]);
+  }, [roomId, accessToken, currentProfileId]);
 };

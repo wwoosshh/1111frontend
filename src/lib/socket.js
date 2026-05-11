@@ -21,13 +21,13 @@ export const disconnectSocket = () => {
   }
 };
 
-export const emitRoomSubscribe = (roomId) =>
+export const emitRoomSubscribe = (roomId, profileId) =>
   new Promise((resolve) => {
     const s = currentSocket;
     if (!s) return resolve({ ok: false, code: 'NO_SOCKET' });
-    s.emit('room:subscribe', { roomId }, resolve);
+    s.emit('room:subscribe', { roomId, profileId }, resolve);
   });
 
-export const emitDateToggle = (date) => {
-  currentSocket?.emit('date:toggle', { date });
+export const emitDateToggle = (profileId, date) => {
+  currentSocket?.emit('date:toggle', { profileId, date });
 };
