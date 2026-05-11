@@ -30,11 +30,9 @@ export default function DateCell({
         'group aspect-square relative flex flex-col items-center justify-center rounded-md',
         'font-receipt text-sm transition-colors',
         faded ? 'text-ink/30' : 'text-ink',
-        highlight
-          ? 'text-paper'
-          : 'hover:bg-paper-deep',
+        highlight ? '' : 'hover:bg-paper-deep',
       ].join(' ')}
-      style={highlight ? { background: 'var(--room-theme)' } : undefined}
+      style={highlight ? { background: 'var(--room-theme)', color: 'var(--room-theme-ink)' } : undefined}
     >
       <span className="relative z-10">{day}</span>
 

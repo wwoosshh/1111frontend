@@ -1,4 +1,5 @@
 // frontend/src/components/ReceiptHeader.jsx
+import { Link } from 'react-router-dom';
 import Barcode from './ui/Barcode.jsx';
 
 export default function ReceiptHeader({
@@ -11,12 +12,18 @@ export default function ReceiptHeader({
   return (
     <header className="text-center pt-7 pb-3">
       <div className="font-receipt text-[10px] tracking-[0.3em] text-ink-faint">RECEIPT NO.</div>
-      <h1
-        className="font-display text-[42px] leading-none mt-1 mb-3 text-ink"
-        style={{ textShadow: '1px 1px 0 var(--paper-edge)' }}
+      <Link
+        to="/"
+        className="block group focus:outline-none"
+        aria-label="홈으로 이동"
       >
-        여기모여
-      </h1>
+        <h1
+          className="font-display text-[42px] leading-none mt-1 mb-3 text-ink transition-transform group-hover:-rotate-1 group-hover:scale-[1.02]"
+          style={{ textShadow: '1px 1px 0 var(--paper-edge)' }}
+        >
+          여기모여
+        </h1>
+      </Link>
       <Barcode seed={barcodeSeed} className="mb-3" />
       <div className="grid grid-cols-4 text-[9px] tracking-[0.18em] mt-3 text-ink-faint font-receipt">
         <div>

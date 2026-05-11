@@ -19,18 +19,40 @@ const hexToRgb = (hex) => {
   return [n >> 16, (n >> 8) & 255, n & 255];
 };
 
+// sRGB relative luminance per WCAG
+const relativeLuminance = ([r, g, b]) => {
+  const a = [r, g, b].map((v) => {
+    const c = v / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
+};
+
+// Darken a hex color by mixing toward black. amount in [0,1].
+const darken = (rgb, amount = 0.45) => {
+  const [r, g, b] = rgb.map((c) => Math.round(c * (1 - amount)));
+  return `rgb(${r}, ${g}, ${b})`;
+};
+
 const applyRoomTheme = (themeHex) => {
   if (typeof document === 'undefined') return;
   const root = document.documentElement;
   if (!themeHex) {
     root.style.removeProperty('--room-theme');
     root.style.removeProperty('--room-theme-soft');
+    root.style.removeProperty('--room-theme-ink');
+    root.style.removeProperty('--room-theme-strong');
     return;
   }
   const rgb = hexToRgb(themeHex);
   root.style.setProperty('--room-theme', themeHex);
   if (rgb) {
     root.style.setProperty('--room-theme-soft', `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.16)`);
+    // Pick dark ink for light themes, cream for dark themes (threshold 0.55 favors readability)
+    const ink = relativeLuminance(rgb) > 0.55 ? '#2A1F1A' : '#FFF8EE';
+    root.style.setProperty('--room-theme-ink', ink);
+    // A darker variant of the theme for strokes/focus rings/etc that must remain visible on cream
+    root.style.setProperty('--room-theme-strong', darken(rgb, 0.45));
   }
 };
 
@@ -41,7 +63,6 @@ export default function PageShell({ children, headerProps, footerProps }) {
   const currentProfileId = useRoomStore((s) => s.currentProfileId);
   const currentProfile = profiles.find((p) => p.id === currentProfileId);
 
-  // Apply room theme CSS variable when room context changes
   useEffect(() => {
     applyRoomTheme(room?.theme);
     return () => applyRoomTheme(null);

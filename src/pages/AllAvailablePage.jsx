@@ -133,6 +133,11 @@ function ConfettiBits({ count = 22 }) {
 
 function ConfirmedView({ roomName, date, profiles }) {
   const formatted = formatDate(date);
+  return <ConfirmedViewInner roomName={roomName} formatted={formatted} profiles={profiles} />;
+}
+
+function ConfirmedViewInner({ roomName, formatted, profiles }) {
+  const nav = useNavigate();
   return (
     <PageShell headerProps={{ date: formatted }} footerProps={{ date: formatted }}>
       <style>{`
@@ -146,7 +151,7 @@ function ConfirmedView({ roomName, date, profiles }) {
       <div className="relative animate-shake">
         <ConfettiBits />
         <div className="flex flex-col items-center py-5">
-          <Stamp size="xl" rotate={-12} className="animate-stamp-drop" color="var(--room-theme)">
+          <Stamp size="xl" rotate={-12} className="animate-stamp-drop" color="var(--stamp)">
             ✓ CONFIRMED
           </Stamp>
           <div className="mt-6 text-center">
@@ -170,6 +175,9 @@ function ConfirmedView({ roomName, date, profiles }) {
       <p className="font-script text-3xl text-stamp text-center mt-7" style={{ transform: 'rotate(-3deg)' }}>
         See you soon!
       </p>
+      <div className="flex gap-3 justify-center mt-6">
+        <Button onClick={() => nav('/rooms')}>BACK TO ROOMS</Button>
+      </div>
     </PageShell>
   );
 }
