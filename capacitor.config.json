@@ -1,0 +1,13 @@
+{
+  "appId": "com.wwoosshh.noraboja",
+  "appName": "여기모여",
+  "webDir": "dist",
+  "server": {
+    "url": "https://1111frontend.vercel.app",
+    "cleartext": false,
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}
