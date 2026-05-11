@@ -59,7 +59,7 @@ export default function CalendarPage() {
   };
 
   return (
-    <PageShell footerProps={{ name: me?.name || '나' }}>
+    <PageShell>
       <div className="flex justify-between items-center mb-2 text-xs">
         <span className="flex items-center gap-1">
           <span className="w-2 h-2 rounded-full" style={{ background: me?.color || '#F4A6A6' }} />
